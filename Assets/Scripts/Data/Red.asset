@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Red
   m_EditorClassIdentifier: 
   label: Rojos
-  color: {r: 1, g: 0.3820755, b: 0.3820755, a: 1}
+  material: {fileID: 2100000, guid: 095c05898e9aa1447a1d5124dee3c4ec, type: 2}

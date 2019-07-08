@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Green
   m_EditorClassIdentifier: 
   label: Verdes
-  color: {r: 0.48321062, g: 0.7735849, b: 0.46707013, a: 1}
+  material: {fileID: 2100000, guid: 1a73e3ce9d6c85048985584d5bf8eece, type: 2}

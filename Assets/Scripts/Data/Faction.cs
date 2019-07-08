@@ -4,5 +4,5 @@
 public class Faction : ScriptableObject
 {
     public string label;
-    public Color color;
+    public Material material;
 }
