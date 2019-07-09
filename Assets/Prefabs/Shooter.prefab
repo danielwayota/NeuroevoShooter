@@ -61,6 +61,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   body: {fileID: 1458047287781017397}
+  fov: 1
+  eyeCount: 7
+  viewDistance: 8
 --- !u!54 &7192770056244735636
 Rigidbody:
   m_ObjectHideFlags: 0
