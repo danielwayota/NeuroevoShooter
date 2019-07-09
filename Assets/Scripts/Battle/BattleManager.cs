@@ -18,6 +18,14 @@ public class BattleManager : MonoBehaviour
     private Team redTeam;
     private Team greenTeam;
 
+    // Timers
+    float checkTimer = 0;
+    float checkTimeOut = 0.5f;
+
+    float generationTime = 0f;
+    float maxGenerationTime = 1f;
+
+
     // ===================================
     void Start()
     {
@@ -56,6 +64,50 @@ public class BattleManager : MonoBehaviour
         this.greenTeam = new Team(greenFactionCount, this.green, this.shooterPrefab);
 
         // Allocate team members
+        this.AllocateTeams();
+    }
+
+    // ===================================
+    void Update()
+    {
+        this.checkTimer += Time.deltaTime;
+        this.generationTime += Time.deltaTime;
+
+        if (this.checkTimer > this.checkTimeOut)
+        {
+            this.checkTimer -= this.checkTimeOut;
+
+            if (this.redTeam.AreAllDead() || this.greenTeam.AreAllDead())
+            {
+                this.generationTime = 0f;
+
+                this.NextGeneration();
+                this.AllocateTeams();
+            }
+        }
+
+        if (this.generationTime > this.maxGenerationTime)
+        {
+            this.generationTime -= this.maxGenerationTime;
+
+            this.NextGeneration();
+            this.AllocateTeams();
+        }
+    }
+
+    // ===================================
+    void NextGeneration()
+    {
+        this.redTeam.KillAll();
+        this.greenTeam.KillAll();
+
+        this.redTeam.Next();
+        this.greenTeam.Next();
+    }
+
+    // ===================================
+    void AllocateTeams()
+    {
         foreach (var room in this.rooms)
         {
             this.redTeam.AllocateShooters(

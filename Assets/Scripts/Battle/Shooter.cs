@@ -1,7 +1,9 @@
 ﻿using CerebroML;
+using CerebroML.Factory;
 using CerebroML.Genetics;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Shooter : MonoBehaviour, IEntity
 {
     public Renderer body;
@@ -23,10 +25,22 @@ public class Shooter : MonoBehaviour, IEntity
     }
     private Cerebro brain;
 
+    private Rigidbody physics;
+
+    private float[] sensorData;
+
     // =======================================
     void Start()
     {
+        this.sensorData = new float[3];
 
+        this.brain = BrainFactory.Create()
+            .WithInput(this.sensorData.Length)
+            .WithLayer(3, LayerType.Tanh)
+            .WithLayer(3, LayerType.Sigmoid)
+            .Build();
+
+        this.physics = GetComponent<Rigidbody>();
     }
 
     // =======================================
@@ -54,12 +68,12 @@ public class Shooter : MonoBehaviour, IEntity
     // =======================================
     public Genome GetGenome()
     {
-        throw new System.NotImplementedException();
+        return this.brain.GetGenome();
     }
 
     // =======================================
     public void SetGenome(Genome g)
     {
-        throw new System.NotImplementedException();
+        this.brain.SetGenome(g);
     }
 }

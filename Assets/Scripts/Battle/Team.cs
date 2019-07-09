@@ -36,7 +36,7 @@ public class Team : Population<Shooter>
         int i = 0;
         int j = 0;
 
-        while(i < spawns.Length && i < this.entities.Length)
+        while(i < spawns.Length && j < this.entities.Length)
         {
             var entity = this.entities[j];
             if (!entity.active)
@@ -52,8 +52,36 @@ public class Team : Population<Shooter>
     }
 
     // ==============================================
+    public void KillAll()
+    {
+        foreach (var shooter in this.entities)
+        {
+            shooter.Deactivate();
+        }
+    }
+
+    // ==============================================
+    public bool AreAllDead()
+    {
+        int i = 0;
+        bool allDead = true;
+
+        while(i < this.entities.Length && allDead)
+        {
+            if (entities[i].active)
+            {
+                allDead = false;
+            }
+
+            i++;
+        }
+
+        return allDead;
+    }
+
+    // ==============================================
     public override float GetFitness(Shooter entity, int index)
     {
-        return 0f;
+        return 0.5f;
     }
 }
