@@ -41,7 +41,7 @@ public class Team : Population<Shooter>
             var entity = this.entities[j];
             if (!entity.active)
             {
-                this.entities[j].Activate(spawns[i].position);
+                this.entities[j].Activate(spawns[i]);
                 this.entities[j].SetAnchor(anchor);
 
                 i++;
@@ -79,9 +79,35 @@ public class Team : Population<Shooter>
         return allDead;
     }
 
+    float maxKills = 0;
+    float maxAliveTime = 0;
+
+    // ==============================================
+    public override void OnBeforeNextGeneration()
+    {
+        this.maxKills = 0;
+        this.maxAliveTime = 0;
+
+        foreach (var shooter in this.entities)
+        {
+            this.maxKills = Mathf.Max(shooter.kills, this.maxKills);
+            this.maxAliveTime = Mathf.Max(shooter.aliveTime, this.maxAliveTime);
+        }
+
+        // Avoid zero division
+        this.maxKills = Mathf.Max(1, this.maxKills);
+        this.maxAliveTime = Mathf.Max(1, this.maxAliveTime);
+    }
+
     // ==============================================
     public override float GetFitness(Shooter entity, int index)
     {
-        return 0.5f;
+        float alive = entity.aliveTime / this.maxAliveTime;
+
+        float kills = entity.kills / this.maxKills;
+
+        float fitness = (alive * 0.5f) + (kills * 0.5f);
+
+        return Mathf.Pow(fitness, 2);
     }
 }

@@ -60,10 +60,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7c02dcb3b7e64c4f8580a4913111f96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shootGfxPrefab: {fileID: 5368310448716627865, guid: e5b943cf8cee244438733543ff63f31c,
+    type: 3}
   body: {fileID: 1458047287781017397}
   fov: 1
-  eyeCount: 7
-  viewDistance: 8
+  eyeCount: 9
+  viewDistance: 32
+  movementSpeed: 2
+  turnSpeed: 16
 --- !u!54 &7192770056244735636
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -78,7 +82,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!1 &3080409199874278218
 GameObject:

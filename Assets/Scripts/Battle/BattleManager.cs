@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class BattleManager : MonoBehaviour
 {
+    public UIStatus ui;
+
     public GameObject shooterPrefab;
     public GameObject[] roomPrefabs;
 
@@ -20,11 +22,13 @@ public class BattleManager : MonoBehaviour
 
     // Timers
     float checkTimer = 0;
-    float checkTimeOut = 0.5f;
+    public float checkTimeOut = 0.5f;
 
     float generationTime = 0f;
-    float maxGenerationTime = 1f;
-
+    private float currentGenerationTimeLimit = 0f;
+    public float minGenerationTime = 10f;
+    public float maxGenerationTime = 60f;
+    public float generationTimeIncrement = 1f;
 
     // ===================================
     void Start()
@@ -65,6 +69,11 @@ public class BattleManager : MonoBehaviour
 
         // Allocate team members
         this.AllocateTeams();
+
+        this.currentGenerationTimeLimit = this.minGenerationTime;
+
+        this.ui.SetGeneration(1);
+        this.ui.SetGenerationTime(this.currentGenerationTimeLimit);
     }
 
     // ===================================
@@ -86,9 +95,9 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        if (this.generationTime > this.maxGenerationTime)
+        if (this.generationTime > this.currentGenerationTimeLimit)
         {
-            this.generationTime -= this.maxGenerationTime;
+            this.generationTime -= this.currentGenerationTimeLimit;
 
             this.NextGeneration();
             this.AllocateTeams();
@@ -103,6 +112,13 @@ public class BattleManager : MonoBehaviour
 
         this.redTeam.Next();
         this.greenTeam.Next();
+
+        this.currentGenerationTimeLimit = Mathf.Min(
+            this.maxGenerationTime,
+            this.currentGenerationTimeLimit + this.generationTimeIncrement
+        );
+        this.ui.SetGeneration(this.redTeam.generationNumber);
+        this.ui.SetGenerationTime(this.currentGenerationTimeLimit);
     }
 
     // ===================================

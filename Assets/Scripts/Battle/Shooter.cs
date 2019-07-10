@@ -6,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Shooter : MonoBehaviour, IEntity
 {
+    public GameObject shootGfxPrefab;
+
     [Header("Rendering")]
     public Renderer body;
 
@@ -13,6 +15,10 @@ public class Shooter : MonoBehaviour, IEntity
     public float fov = 1f;
     public int eyeCount = 3;
     public float viewDistance = 8f;
+
+    [Header("Movement")]
+    public float movementSpeed = 2f;
+    public float turnSpeed = 1f;
 
     private Vector3[] eyes;
 
@@ -46,17 +52,26 @@ public class Shooter : MonoBehaviour, IEntity
     private Rigidbody physics;
 
     private float[] sensorData;
+    private float[] reaction;
 
     private float tickTimer = 0;
     private float tickTimeOut = 0.5f;
 
+    private float health = 1f;
+
+    private bool damaged;
+    private Vector3 damageDirection;
+
     // =======================================
     void Start()
     {
+        // Sensor data
         /**
          * x
          * y
          * health_percent
+         * forward_x
+         * forward_y
          * eye_active
          * eye_x
          * eye_y
@@ -67,17 +82,23 @@ public class Shooter : MonoBehaviour, IEntity
          * hit_from_x
          * hit_from_y
          */
-
         this.eyes = new Vector3[this.eyeCount];
-
         this.sensorData = new float[
             3 + this.eyes.Length * 3 + 3
         ];
+        // Reaction data
+        /**
+         * forward
+         * backwards
+         * turn left
+         * turn right
+         * shoot
+         */
+        this.reaction = new float[5];
 
         this.brain = BrainFactory.Create()
             .WithInput(this.sensorData.Length)
-            .WithLayer(3, LayerType.Tanh)
-            .WithLayer(3, LayerType.Sigmoid)
+            .WithLayer(this.reaction.Length, LayerType.Tanh)
             .Build();
 
         this.physics = GetComponent<Rigidbody>();
@@ -95,7 +116,52 @@ public class Shooter : MonoBehaviour, IEntity
 
             // "Think"
             this.CollectSensorData();
+
+            this.reaction = this.brain.Run(this.sensorData);
+
+            float shoot = this.reaction[4];
+
+            if (shoot >= 0.5f)
+            {
+                RaycastHit hit;
+
+                Vector3 position = this.transform.position;
+                Vector3 end = position + this.transform.forward * this.viewDistance;
+
+                if (Physics.Raycast(position, this.transform.forward, out hit, this.viewDistance))
+                {
+                    // What object is
+                    var shooter = hit.collider.gameObject.GetComponent<Shooter>();
+                    if (shooter != null)
+                    {
+                        shooter.ReceiveDamage(0.3f);
+
+                        if (shooter.faction == this.faction)
+                        {
+                            // Friendly fire
+                            this.kills -= 2;
+                        }
+                        else
+                        {
+                            this.kills++;
+                        }
+                    }
+
+                    end = hit.point;
+                }
+                var go = Instantiate(this.shootGfxPrefab);
+                ShootGfx s = go.GetComponent<ShootGfx>();
+
+                s.start = position;
+                s.end = end;
+            }
         }
+
+        float forward = this.reaction[0] - this.reaction[1];
+        this.physics.velocity = this.transform.forward * forward * this.movementSpeed;
+
+        float turn = this.reaction[2] - this.reaction[3];
+        this.transform.Rotate(0, turn * this.turnSpeed * Time.deltaTime, 0);
     }
 
     // =======================================
@@ -104,7 +170,10 @@ public class Shooter : MonoBehaviour, IEntity
         // Collect position and health
         this.sensorData[0] = this.transform.position.x;
         this.sensorData[1] = this.transform.position.z;
-        // TODO: Collect health
+        this.sensorData[2] = this.health;
+        this.sensorData[3] = this.transform.forward.x;
+        this.sensorData[4] = this.transform.forward.z;
+
 
         this.CollectEyesSensorData();
 
@@ -137,7 +206,8 @@ public class Shooter : MonoBehaviour, IEntity
         // Detect what each eye 'sees' and put the data in the sensor
         // If nothing is seen, just put 0
 
-        int sensorIndex = 3;
+        // This is where the 'eyes' data starts.
+        int sensorIndex = 5;
         Vector3 position = this.transform.position;
 
         foreach (var lookDir in this.eyes)
@@ -153,17 +223,42 @@ public class Shooter : MonoBehaviour, IEntity
             float seeZ = 0;
 
             // Three front eyes
-            if (Physics.Raycast(position, lookDir, out hit, this.viewDistance))
+            if (Physics.Raycast(position + (lookDir * 0.5f), lookDir, out hit, this.viewDistance))
             {
                 GameObject go = hit.collider.gameObject;
 
+                Shooter sh = go.GetComponent<Shooter>();
+
+                if (sh != null)
+                {
+                    if (sh.faction == this.faction)
+                    {
+                        // Friend
+                        see = 1f;
+                        Debug.DrawLine(position, hit.point, Color.green, 1f );
+                    }
+                    else
+                    {
+                        // Enemy
+                        see = -1;
+                        Debug.DrawLine(position, hit.point, Color.red, 1f );
+                    }
+                }
+                else
+                {
+                    // It's a wall.
+                    see = .5f;
+                    Debug.DrawLine(position, hit.point, Color.black, 1f );
+                }
+
                 // TODO: set some types
-                see = 1;
                 seeX = hit.point.x;
                 seeZ = hit.point.z;
-            }
 
-            Debug.DrawLine(position, position + lookDir * this.viewDistance, Color.red, 1f );
+
+            } else {
+                Debug.DrawLine(position, position + lookDir * this.viewDistance, Color.grey, 1f );
+            }
 
             sensorData[sensorIndex + 0] = see;
             sensorData[sensorIndex + 1] = seeX;
@@ -177,9 +272,31 @@ public class Shooter : MonoBehaviour, IEntity
     {
         int sensorIndex = 3 + this.eyes.Length * 3;
 
-        sensorData[sensorIndex + 0] = 0;
-        sensorData[sensorIndex + 1] = 0;
-        sensorData[sensorIndex + 2] = 0;
+        sensorData[sensorIndex + 0] = this.damaged ? 1f : 0f;
+        sensorData[sensorIndex + 1] = this.damageDirection.x;
+        sensorData[sensorIndex + 2] = this.damageDirection.z;
+
+        // Clear hit data
+        this.damaged = false;
+        this.damageDirection.Set(0, 0, 0);
+    }
+
+    // =======================================
+    public bool ReceiveDamage(float damage)
+    {
+        this.health -= damage;
+
+        if (this.health <= 0f)
+        {
+            this.health = 0;
+
+            this.Deactivate();
+
+            // I am dead :(
+            return true;
+        }
+
+        return false;
     }
 
     // =======================================
@@ -189,7 +306,7 @@ public class Shooter : MonoBehaviour, IEntity
     }
 
     // =======================================
-    public void Activate(Vector3 position)
+    public void Activate(Transform activationPoint)
     {
         this.kills = 0;
         this.aliveTime = 0f;
@@ -197,7 +314,8 @@ public class Shooter : MonoBehaviour, IEntity
         this.active = true;
         this.gameObject.SetActive(true);
 
-        this.transform.position = position;
+        this.transform.position = activationPoint.position;
+        this.transform.rotation = activationPoint.rotation;
     }
 
     // =======================================
