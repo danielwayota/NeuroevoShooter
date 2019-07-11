@@ -105,7 +105,7 @@ public class Shooter : MonoBehaviour, IEntity
             .WithInput(this.sensorData.Length)
             .WithLayer(16, LayerType.Tanh)
             .WithLayer(8, LayerType.Tanh)
-            .WithLayer(this.reaction.Length, LayerType.Tanh)
+            .WithLayer(this.reaction.Length, LayerType.Sigmoid)
             .Build();
 
         this.physics = GetComponent<Rigidbody>();
@@ -182,6 +182,7 @@ public class Shooter : MonoBehaviour, IEntity
         this.sensorData[0] = this.transform.position.x;
         this.sensorData[1] = this.transform.position.z;
         this.sensorData[2] = this.health;
+        // 'Can shoot' timer
         this.sensorData[3] = Mathf.Min(this.shootCoolDownTimer / this.shootCoolDownTimeOut, 1f);
         this.sensorData[4] = this.transform.forward.x;
         this.sensorData[5] = this.transform.forward.z;
@@ -321,6 +322,7 @@ public class Shooter : MonoBehaviour, IEntity
     {
         this.hits = 0;
         this.aliveTime = 0f;
+        this.health = 1f;
 
         this.active = true;
         this.gameObject.SetActive(true);

@@ -64,10 +64,10 @@ MonoBehaviour:
     type: 3}
   body: {fileID: 1458047287781017397}
   fov: 1
-  eyeCount: 9
-  viewDistance: 32
-  movementSpeed: 2
-  turnSpeed: 16
+  eyeCount: 15
+  viewDistance: 30
+  movementSpeed: 4
+  turnSpeed: 64
 --- !u!54 &7192770056244735636
 Rigidbody:
   m_ObjectHideFlags: 0
