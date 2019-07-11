@@ -27,7 +27,7 @@ public class Shooter : MonoBehaviour, IEntity
         get; protected set;
     }
 
-    public int kills
+    public int hits
     {
         get; protected set;
     }
@@ -57,6 +57,9 @@ public class Shooter : MonoBehaviour, IEntity
     private float tickTimer = 0;
     private float tickTimeOut = 0.5f;
 
+    private float shootCoolDownTimer = 0;
+    private float shootCoolDownTimeOut = 1.5f;
+
     private float health = 1f;
 
     private bool damaged;
@@ -70,8 +73,10 @@ public class Shooter : MonoBehaviour, IEntity
          * x
          * y
          * health_percent
+         * Can shoot
          * forward_x
          * forward_y
+         *
          * eye_active
          * eye_x
          * eye_y
@@ -84,7 +89,7 @@ public class Shooter : MonoBehaviour, IEntity
          */
         this.eyes = new Vector3[this.eyeCount];
         this.sensorData = new float[
-            3 + this.eyes.Length * 3 + 3
+            6 + this.eyes.Length * 3 + 3
         ];
         // Reaction data
         /**
@@ -98,6 +103,8 @@ public class Shooter : MonoBehaviour, IEntity
 
         this.brain = BrainFactory.Create()
             .WithInput(this.sensorData.Length)
+            .WithLayer(16, LayerType.Tanh)
+            .WithLayer(8, LayerType.Tanh)
             .WithLayer(this.reaction.Length, LayerType.Tanh)
             .Build();
 
@@ -110,6 +117,8 @@ public class Shooter : MonoBehaviour, IEntity
         this.aliveTime += Time.deltaTime;
         this.tickTimer += Time.deltaTime;
 
+        this.shootCoolDownTimer += Time.deltaTime;
+
         if (this.tickTimer > this.tickTimeOut)
         {
             this.tickTimer -= this.tickTimeOut;
@@ -121,8 +130,10 @@ public class Shooter : MonoBehaviour, IEntity
 
             float shoot = this.reaction[4];
 
-            if (shoot >= 0.5f)
+            if (shoot >= 0.5f && this.shootCoolDownTimer >= this.shootCoolDownTimeOut)
             {
+                this.shootCoolDownTimer = 0f;
+
                 RaycastHit hit;
 
                 Vector3 position = this.transform.position;
@@ -134,16 +145,16 @@ public class Shooter : MonoBehaviour, IEntity
                     var shooter = hit.collider.gameObject.GetComponent<Shooter>();
                     if (shooter != null)
                     {
-                        shooter.ReceiveDamage(0.3f);
+                        bool killed = shooter.ReceiveDamage(0.3f);
 
                         if (shooter.faction == this.faction)
                         {
                             // Friendly fire
-                            this.kills -= 2;
+                            this.hits -= killed ? 3 : 2;
                         }
                         else
                         {
-                            this.kills++;
+                            this.hits += killed ? 2 : 1;
                         }
                     }
 
@@ -171,9 +182,9 @@ public class Shooter : MonoBehaviour, IEntity
         this.sensorData[0] = this.transform.position.x;
         this.sensorData[1] = this.transform.position.z;
         this.sensorData[2] = this.health;
-        this.sensorData[3] = this.transform.forward.x;
-        this.sensorData[4] = this.transform.forward.z;
-
+        this.sensorData[3] = Mathf.Min(this.shootCoolDownTimer / this.shootCoolDownTimeOut, 1f);
+        this.sensorData[4] = this.transform.forward.x;
+        this.sensorData[5] = this.transform.forward.z;
 
         this.CollectEyesSensorData();
 
@@ -207,7 +218,7 @@ public class Shooter : MonoBehaviour, IEntity
         // If nothing is seen, just put 0
 
         // This is where the 'eyes' data starts.
-        int sensorIndex = 5;
+        int sensorIndex = 6;
         Vector3 position = this.transform.position;
 
         foreach (var lookDir in this.eyes)
@@ -270,7 +281,7 @@ public class Shooter : MonoBehaviour, IEntity
     // =======================================
     void CollectHitSensorData()
     {
-        int sensorIndex = 3 + this.eyes.Length * 3;
+        int sensorIndex = 6 + this.eyes.Length * 3;
 
         sensorData[sensorIndex + 0] = this.damaged ? 1f : 0f;
         sensorData[sensorIndex + 1] = this.damageDirection.x;
@@ -308,14 +319,16 @@ public class Shooter : MonoBehaviour, IEntity
     // =======================================
     public void Activate(Transform activationPoint)
     {
-        this.kills = 0;
+        this.hits = 0;
         this.aliveTime = 0f;
 
         this.active = true;
         this.gameObject.SetActive(true);
 
-        this.transform.position = activationPoint.position;
         this.transform.rotation = activationPoint.rotation;
+
+        float bilinear = Random.Range(-1, 1);
+        this.transform.position = activationPoint.position + Vector3.right * bilinear;
     }
 
     // =======================================

@@ -79,23 +79,23 @@ public class Team : Population<Shooter>
         return allDead;
     }
 
-    float maxKills = 0;
+    float maxHits = 0;
     float maxAliveTime = 0;
 
     // ==============================================
     public override void OnBeforeNextGeneration()
     {
-        this.maxKills = 0;
+        this.maxHits = 0;
         this.maxAliveTime = 0;
 
         foreach (var shooter in this.entities)
         {
-            this.maxKills = Mathf.Max(shooter.kills, this.maxKills);
+            this.maxHits = Mathf.Max(shooter.hits, this.maxHits);
             this.maxAliveTime = Mathf.Max(shooter.aliveTime, this.maxAliveTime);
         }
 
         // Avoid zero division
-        this.maxKills = Mathf.Max(1, this.maxKills);
+        this.maxHits = Mathf.Max(1, this.maxHits);
         this.maxAliveTime = Mathf.Max(1, this.maxAliveTime);
     }
 
@@ -104,7 +104,7 @@ public class Team : Population<Shooter>
     {
         float alive = entity.aliveTime / this.maxAliveTime;
 
-        float kills = entity.kills / this.maxKills;
+        float kills = entity.hits / this.maxHits;
 
         float fitness = (alive * 0.5f) + (kills * 0.5f);
 
