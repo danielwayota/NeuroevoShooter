@@ -27,7 +27,7 @@ public class Team : Population<Shooter>
             tmp.faction = faction;
         }
 
-        this.SetUp(shooters, 0.05f, 1f);
+        this.SetUp(shooters, 0.05f, 10f);
     }
 
     // ==============================================
@@ -35,6 +35,8 @@ public class Team : Population<Shooter>
     {
         int i = 0;
         int j = 0;
+
+        this.Shuffle();
 
         while(i < spawns.Length && j < this.entities.Length)
         {
@@ -48,6 +50,19 @@ public class Team : Population<Shooter>
             }
 
             j++;
+        }
+    }
+
+    // ==============================================
+    public void Shuffle()
+    {
+        for (int i = 0; i < this.entities.Length - 1; i++)
+        {
+            int index = Random.Range(i + 1, this.entities.Length);
+
+            var aux = this.entities[index];
+            this.entities[index] = this.entities[i];
+            this.entities[i] = aux;
         }
     }
 

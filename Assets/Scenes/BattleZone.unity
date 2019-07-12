@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -154,14 +154,16 @@ MonoBehaviour:
     type: 3}
   roomPrefabs:
   - {fileID: 3904356053780227845, guid: 616042128559a3841bded077863879cc, type: 3}
+  - {fileID: 3904356053780227845, guid: 616042128559a3841bded077863879cc, type: 3}
+  - {fileID: 3904356053780227845, guid: b188ca8c30a8270fc8328305fb83b4d2, type: 3}
   roomSize: 48
   red: {fileID: 11400000, guid: 8cda424b03ffc97f880253a30e4777b4, type: 2}
   green: {fileID: 11400000, guid: cf6e9c36e821147e2b02c018960d24fa, type: 2}
-  roomCount: 5
+  roomCount: 32
   checkTimeOut: 0.5
-  minGenerationTime: 10
-  maxGenerationTime: 60
-  generationTimeIncrement: 0.25
+  minGenerationTime: 20
+  maxGenerationTime: 80
+  generationTimeIncrement: 0.2
 --- !u!4 &135394142
 Transform:
   m_ObjectHideFlags: 0
@@ -826,6 +828,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1511990179}
   m_CullTransparentMesh: 0
+--- !u!1 &1553603675
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1553603677}
+  - component: {fileID: 1553603676}
+  m_Layer: 0
+  m_Name: PrefabPooling
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1553603676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1553603675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff95739c81e0fae27b4889108edf5747, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabsList:
+  - name: shoot
+    prefab: {fileID: 5368310448716627865, guid: e5b943cf8cee244438733543ff63f31c,
+      type: 3}
+--- !u!4 &1553603677
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1553603675}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1667338067
 GameObject:
   m_ObjectHideFlags: 0

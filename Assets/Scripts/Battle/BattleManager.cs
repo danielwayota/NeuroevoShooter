@@ -44,8 +44,9 @@ public class BattleManager : MonoBehaviour
         for (int i = 0; i < this.roomCount; i++)
         {
             // TODO: Pick a random room with some logic
+            int index = Random.Range(0, this.roomPrefabs.Length);
             var obj = Instantiate(
-                this.roomPrefabs[0],
+                this.roomPrefabs[index],
                 position + Vector3.right * this.roomSize *  i,
                 Quaternion.identity
             );

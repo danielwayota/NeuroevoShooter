@@ -5,14 +5,22 @@ public class ShootGfx : MonoBehaviour
     public Vector3 start;
     public Vector3 end;
 
-    void Start()
+    private LineRenderer line;
+
+    void OnEnable()
     {
-        Destroy(this.gameObject, .3f);
+        Invoke("PseudoDestroy", .3f);
 
-        LineRenderer line = GetComponent<LineRenderer>();
+        if (this.line == null) { this.line = GetComponent<LineRenderer>(); }
 
-        line.positionCount = 2;
-        line.SetPosition(0, start);
-        line.SetPosition(1, end);
+        this.line.positionCount = 2;
+
+        this.line.SetPosition(0, start);
+        this.line.SetPosition(1, end);
+    }
+
+    void PseudoDestroy()
+    {
+        this.gameObject.SetActive(false);
     }
 }
