@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5377844498125385594}
   - component: {fileID: 8598431050644034120}
   - component: {fileID: 7192770056244735636}
+  - component: {fileID: 386701146385468258}
   m_Layer: 0
   m_Name: Shooter
   m_TagString: Untagged
@@ -60,8 +61,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7c02dcb3b7e64c4f8580a4913111f96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shootGfxPrefab: {fileID: 5368310448716627865, guid: e5b943cf8cee244438733543ff63f31c,
-    type: 3}
   body: {fileID: 1458047287781017397}
   fov: 1
   eyeCount: 15
@@ -84,6 +83,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &386701146385468258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 606709616601413924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 763fea1bfca8870d19f4bfe95c87f736, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  marginBetweenPoints: 1
 --- !u!1 &3080409199874278218
 GameObject:
   m_ObjectHideFlags: 0

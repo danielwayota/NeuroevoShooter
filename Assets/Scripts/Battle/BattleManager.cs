@@ -12,7 +12,6 @@ public class BattleManager : MonoBehaviour
     public Faction red;
     public Faction green;
 
-    [Range(1, 32)]
     public int roomCount = 1;
 
     private Room[] rooms;
@@ -73,7 +72,7 @@ public class BattleManager : MonoBehaviour
 
         this.currentGenerationTimeLimit = this.minGenerationTime;
 
-        this.ui.SetGeneration(1);
+        this.ui.SetGeneration(0);
         this.ui.SetGenerationTime(this.currentGenerationTimeLimit);
     }
 

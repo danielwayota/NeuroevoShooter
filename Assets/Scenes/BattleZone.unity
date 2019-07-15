@@ -159,7 +159,7 @@ MonoBehaviour:
   roomSize: 48
   red: {fileID: 11400000, guid: 8cda424b03ffc97f880253a30e4777b4, type: 2}
   green: {fileID: 11400000, guid: cf6e9c36e821147e2b02c018960d24fa, type: 2}
-  roomCount: 32
+  roomCount: 24
   checkTimeOut: 0.5
   minGenerationTime: 20
   maxGenerationTime: 80

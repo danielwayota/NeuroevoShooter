@@ -36,6 +36,14 @@ public class Shooter : MonoBehaviour, IEntity
         get; protected set;
     }
 
+    public float walkedDistance
+    {
+        get
+        {
+            return this.positionRecorder.GetRecordedDistance();
+        }
+    }
+
     private Faction _faction;
     public Faction faction
     {
@@ -49,6 +57,8 @@ public class Shooter : MonoBehaviour, IEntity
     private Cerebro brain;
 
     private Rigidbody physics;
+
+    private PositionRecorder positionRecorder;
 
     private NameIndexedBuffer sensorBuffer;
     private float[] reaction;
@@ -114,13 +124,14 @@ public class Shooter : MonoBehaviour, IEntity
 
         this.brain = BrainFactory.Create()
             .WithInput(this.sensorBuffer.size)
-            .WithLayer(16, LayerType.Tanh)
-            .WithLayer(8, LayerType.Tanh)
+            // .WithLayer(16, LayerType.Tanh)
+            // .WithLayer(8, LayerType.Tanh)
             .WithLayer(this.reaction.Length, LayerType.Sigmoid)
             .WithWeightBiasAmplitude(10f)
             .Build();
 
         this.physics = GetComponent<Rigidbody>();
+        this.positionRecorder = GetComponent<PositionRecorder>();
     }
 
     // =======================================
@@ -134,6 +145,9 @@ public class Shooter : MonoBehaviour, IEntity
         if (this.tickTimer > this.tickTimeOut)
         {
             this.tickTimer -= this.tickTimeOut;
+
+            // Stats
+            this.positionRecorder.Add(this.transform.position);
 
             // "Think"
             this.CollectSensorData();
@@ -155,6 +169,12 @@ public class Shooter : MonoBehaviour, IEntity
                 {
                     // What object is
                     var shooter = hit.collider.gameObject.GetComponent<Shooter>();
+
+                    if (this.gameObject == hit.collider.gameObject)
+                    {
+                        Debug.LogError("It's me, Mario!");
+                    }
+
                     if (shooter != null)
                     {
                         bool killed = shooter.ReceiveDamage(0.3f);
@@ -267,26 +287,21 @@ public class Shooter : MonoBehaviour, IEntity
                     {
                         // Friend
                         see = 1f;
-                        Debug.DrawLine(position, hit.point, Color.green, 1f );
                     }
                     else
                     {
                         // Enemy
                         see = -1;
-                        Debug.DrawLine(position, hit.point, Color.red, 1f );
                     }
                 }
                 else
                 {
                     // It's a wall.
                     see = .5f;
-                    Debug.DrawLine(position, hit.point, Color.black, 1f );
                 }
 
                 seeX = hit.point.x;
                 seeZ = hit.point.z;
-            } else {
-                Debug.DrawLine(position, position + lookDir * this.viewDistance, Color.grey, 1f );
             }
 
             this.sensorBuffer.SetData($"eye_{eyeIndex}", see, seeX, seeZ);
@@ -339,8 +354,12 @@ public class Shooter : MonoBehaviour, IEntity
     // =======================================
     public void Activate(Transform activationPoint)
     {
+        // Stats
         this.hits = 0;
         this.aliveTime = 0f;
+        if (this.positionRecorder != null)
+            this.positionRecorder.Reset();
+
         this.health = 1f;
         this.damaged = false;
 

@@ -27,7 +27,7 @@ public class Team : Population<Shooter>
             tmp.faction = faction;
         }
 
-        this.SetUp(shooters, 0.05f, 10f);
+        this.SetUp(shooters, 0.1f, 10f);
     }
 
     // ==============================================
@@ -94,34 +94,74 @@ public class Team : Population<Shooter>
         return allDead;
     }
 
+    // ONLY TIME AND HITS
+
+    // float maxHits = 0;
+    // float maxAliveTime = 0;
+
+    // // ==============================================
+    // public override void OnBeforeNextGeneration()
+    // {
+    //     this.maxHits = 0;
+    //     this.maxAliveTime = 0;
+
+    //     foreach (var shooter in this.entities)
+    //     {
+    //         this.maxHits = Mathf.Max(shooter.hits, this.maxHits);
+    //         this.maxAliveTime = Mathf.Max(shooter.aliveTime, this.maxAliveTime);
+    //     }
+
+    //     // Avoid zero division
+    //     this.maxHits = Mathf.Max(1, this.maxHits);
+    //     this.maxAliveTime = Mathf.Max(1, this.maxAliveTime);
+    // }
+
+    // // ==============================================
+    // public override float GetFitness(Shooter entity, int index)
+    // {
+    //     float alive = entity.aliveTime / this.maxAliveTime;
+
+    //     float kills = entity.hits / this.maxHits;
+
+    //     float fitness = (alive * 0.5f) + (kills * 0.5f);
+
+    //     return Mathf.Pow(fitness, 2);
+    // }
+
+    // ONLY TIME, HITS AND DISTANCE
+
     float maxHits = 0;
     float maxAliveTime = 0;
+    float maxDistance = 0;
 
     // ==============================================
     public override void OnBeforeNextGeneration()
     {
         this.maxHits = 0;
         this.maxAliveTime = 0;
+        this.maxDistance = 0;
 
         foreach (var shooter in this.entities)
         {
             this.maxHits = Mathf.Max(shooter.hits, this.maxHits);
             this.maxAliveTime = Mathf.Max(shooter.aliveTime, this.maxAliveTime);
+            this.maxDistance = Mathf.Max(shooter.walkedDistance, this.maxDistance);
         }
 
         // Avoid zero division
         this.maxHits = Mathf.Max(1, this.maxHits);
         this.maxAliveTime = Mathf.Max(1, this.maxAliveTime);
+        this.maxDistance = Mathf.Max(1, this.maxDistance);
     }
 
     // ==============================================
     public override float GetFitness(Shooter entity, int index)
     {
         float alive = entity.aliveTime / this.maxAliveTime;
-
         float kills = entity.hits / this.maxHits;
+        float walked = entity.walkedDistance / this.maxDistance;
 
-        float fitness = (alive * 0.5f) + (kills * 0.5f);
+        float fitness = (alive * .2f) + (walked * .3f) + (kills * .5f);
 
         return Mathf.Pow(fitness, 2);
     }
