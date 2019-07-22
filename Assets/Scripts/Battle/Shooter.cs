@@ -109,6 +109,7 @@ public class Shooter : MonoBehaviour, IEntity
 
         this.sensorBuffer = new NameIndexedBuffer();
 
+        this.sensorBuffer.AddIndex("time", 1);
         this.sensorBuffer.AddIndex("position", 2);
         this.sensorBuffer.AddIndex("health", 1);
         this.sensorBuffer.AddIndex("shoot_time", 1);
@@ -145,6 +146,8 @@ public class Shooter : MonoBehaviour, IEntity
         this.lookToFoe = new FloatRecorder();
     }
 
+    float senseOfTime = -1f;
+
     // =======================================
     void Update()
     {
@@ -152,6 +155,13 @@ public class Shooter : MonoBehaviour, IEntity
         this.tickTimer += Time.deltaTime;
 
         this.shootCoolDownTimer += Time.deltaTime;
+
+        this.senseOfTime += Time.deltaTime;
+
+        if (this.senseOfTime > 1f)
+        {
+            this.senseOfTime = -1f;
+        }
 
         if (this.tickTimer > this.tickTimeOut)
         {
@@ -161,6 +171,7 @@ public class Shooter : MonoBehaviour, IEntity
             this.positionRecorder.Add(this.transform.position);
 
             // "Think"
+            this.sensorBuffer.SetData("time", this.senseOfTime);
             this.CollectSensorData();
 
             this.reaction = this.brain.Run(this.sensorBuffer.data);
