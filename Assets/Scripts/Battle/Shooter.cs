@@ -38,10 +38,17 @@ public class Shooter : MonoBehaviour, IEntity
 
     public float walkedDistance
     {
-        get
-        {
-            return this.positionRecorder.GetRecordedDistance();
-        }
+        get { return this.positionRecorder.GetRecordedDistance(); }
+    }
+
+    public float friendsLookedPercent
+    {
+        get { return this.lookToFriend.getAvg(); }
+    }
+
+    public float foesLookedPercent
+    {
+        get { return this.lookToFoe.getAvg(); }
     }
 
     private Faction _faction;
@@ -59,6 +66,8 @@ public class Shooter : MonoBehaviour, IEntity
     private Rigidbody physics;
 
     private PositionRecorder positionRecorder;
+    private FloatRecorder lookToFriend;
+    private FloatRecorder lookToFoe;
 
     private NameIndexedBuffer sensorBuffer;
     private float[] reaction;
@@ -75,7 +84,7 @@ public class Shooter : MonoBehaviour, IEntity
     private Vector3 damageDirection;
 
     // =======================================
-    void Start()
+    void Awake()
     {
         // Sensor data
         /**
@@ -124,14 +133,16 @@ public class Shooter : MonoBehaviour, IEntity
 
         this.brain = BrainFactory.Create()
             .WithInput(this.sensorBuffer.size)
-            // .WithLayer(16, LayerType.Tanh)
-            // .WithLayer(8, LayerType.Tanh)
+            .WithLayer(16, LayerType.Tanh)
+            .WithLayer(8, LayerType.Tanh)
             .WithLayer(this.reaction.Length, LayerType.Sigmoid)
             .WithWeightBiasAmplitude(10f)
             .Build();
 
         this.physics = GetComponent<Rigidbody>();
         this.positionRecorder = GetComponent<PositionRecorder>();
+        this.lookToFriend = new FloatRecorder();
+        this.lookToFoe = new FloatRecorder();
     }
 
     // =======================================
@@ -177,7 +188,7 @@ public class Shooter : MonoBehaviour, IEntity
 
                     if (shooter != null)
                     {
-                        bool killed = shooter.ReceiveDamage(0.3f);
+                        bool killed = shooter.ReceiveDamage(0.3f, this.transform.forward);
 
                         if (shooter.faction == this.faction)
                         {
@@ -242,11 +253,11 @@ public class Shooter : MonoBehaviour, IEntity
         int index = 0;
         // Calculate the base angle and the offset for the three eyes
 
-        int eyeOffset = Mathf.FloorToInt(this.eyeCount / 2f);
+        int sideEyeCount = Mathf.FloorToInt(this.eyeCount / 2f);
 
-        float fovPercent = this.fov / eyeOffset;
+        float fovPercent = this.fov / sideEyeCount;
 
-        for (int i = -eyeOffset; i <= eyeOffset; i++)
+        for (int i = -sideEyeCount; i <= sideEyeCount; i++)
         {
             float angle = baseAngle + (fovPercent * i);
             Vector3 lookDir = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
@@ -283,15 +294,22 @@ public class Shooter : MonoBehaviour, IEntity
 
                 if (sh != null)
                 {
+                    float angle = Vector3.Angle(this.transform.forward, lookDir) * Mathf.Deg2Rad;
+                    float percent = angle / this.fov;
+
                     if (sh.faction == this.faction)
                     {
                         // Friend
                         see = 1f;
+
+                        this.lookToFriend.Add(percent);
                     }
                     else
                     {
                         // Enemy
                         see = -1;
+
+                        this.lookToFoe.Add(1f - percent);
                     }
                 }
                 else
@@ -327,10 +345,11 @@ public class Shooter : MonoBehaviour, IEntity
     }
 
     // =======================================
-    public bool ReceiveDamage(float damage)
+    public bool ReceiveDamage(float damage, Vector3 direction)
     {
         this.health -= damage;
         this.damaged = true;
+        this.damageDirection = direction;
 
         if (this.health <= 0f)
         {
@@ -358,7 +377,12 @@ public class Shooter : MonoBehaviour, IEntity
         this.hits = 0;
         this.aliveTime = 0f;
         if (this.positionRecorder != null)
+        {
             this.positionRecorder.Reset();
+
+            this.lookToFriend.Reset();
+            this.lookToFoe.Reset();
+        }
 
         this.health = 1f;
         this.damaged = false;
